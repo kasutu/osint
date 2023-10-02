@@ -49,6 +49,7 @@ def scrape_fb(name):
 
     # Set up Chrome options
     options = Options()
+    options.add_argument("--disable-notifications")
 
     # Use the appropriate WebDriver executable path
     webdriver_service = Service(ChromeDriverManager().install())
