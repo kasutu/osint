@@ -22,21 +22,21 @@ for i in range(progress, len(names)):
 
     print(f"Searching for: {scrapable_name}")
 
+    if "--scrape" in sys.argv:
+        scrape_fb(scrapable_name)
+        continue
 
-    search_url = f"https://www.facebook.com/search/top/?q={first_name.strip()}%2{last_name.strip()}"
-
-    webbrowser.open(search_url)
+    if "--scrape" not in sys.argv:
+        search_url = f"https://www.facebook.com/search/top/?q={first_name.strip()}%2{last_name.strip()}"
+        webbrowser.open(search_url)
+        continue
 
     with open(progress_file, 'w') as f:
         f.write(str(i + 1))
 
-    if "--scrape" in sys.argv:
-        scrape_fb(scrapable_name)
-        continue
-    
     if "--bypass-pause" not in sys.argv:
         input("Press Enter to continue to the next target...")
-        continue
+
 
 if os.path.exists(progress_file):
     os.remove(progress_file)
