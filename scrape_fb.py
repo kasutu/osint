@@ -99,6 +99,7 @@ def scrape_fb(name):
         # Find elements with retry
         print(f'searching for {dynamic_query_encoded}')
         elements = find_elements_with_retry(driver, f'//a[{contains(dynamic_query_encoded)}]')
+        print(elements)
           
         # Open each profile and take a screenshot
         for i in range(len(elements)):
@@ -109,16 +110,16 @@ def scrape_fb(name):
               href = elements[i].get_attribute('href')
               print(href)
 
-              # Open the profile in a new tab
-              driver.execute_script(f"window.open('{href}');")
-              driver.switch_to.window(driver.window_handles[-1])
+              # Open the profile in the current tab
+              driver.execute_script(f"window.location.href = '{href}';")
 
               # Wait for the page to load
               wait = WebDriverWait(driver, 15)  # Wait up to 10 seconds
               wait.until(EC.presence_of_element_located((By.ID, 'facebook')))  # Wait until a specific element is present
     
+              print("Taking screenshot...")
               # Take a screenshot and save it in the 'screenshots' directory
-              driver.save_screenshot(f'screenshots/profile{i}.png')
+              driver.save_screenshot(f'screenshots/{name}/profile{i}.png')
 
               print(f"Saved screenshot for profile {i+1}.")  # Debug log
 
@@ -127,6 +128,10 @@ def scrape_fb(name):
               driver.switch_to.window(driver.window_handles[0])
             else:
                 print("No elements present")  # Debug log
+
+                # Close the tab and switch back to the main window
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
 
     finally:
         # Close the browser window
