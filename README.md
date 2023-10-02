@@ -30,6 +30,12 @@ If you want to bypass the pause after each search, you can use the `--bypass-pau
 python hunt.py --bypass-pause
 ```
 
+If you want to scrape and save the screenshot of the profile, you can use the `--scrape` argument:
+
+```bash
+python hunt.py --scrape
+```
+
 With this argument, the script will automatically proceed to the next name without waiting for you to press Enter.
 
 ## Note
