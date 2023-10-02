@@ -18,12 +18,13 @@ with open(names_file, 'r') as f:
 for i in range(progress, len(names)):
     name = names[i].strip()
     last_name, first_name = name.split(',')
-    scrapable_name = first_name.strip() + " " + last_name.strip()
+    scrapable_name = f"{first_name.strip()} {last_name.strip()}"
 
     print(f"Searching for: {scrapable_name}")
 
     if "--scrape" in sys.argv:
         scrape_fb(scrapable_name)
+        continue
 
     search_url = f"https://www.facebook.com/search/top/?q={first_name.strip()}%2{last_name.strip()}"
 
@@ -35,6 +36,7 @@ for i in range(progress, len(names)):
     
     if "--bypass-pause" not in sys.argv:
         input("Press Enter to continue to the next target...")
+        continue
 
 if os.path.exists(progress_file):
     os.remove(progress_file)
