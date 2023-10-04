@@ -1,11 +1,5 @@
-from selenium import webdriver
+import webbrowser
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import TimeoutException
-from dotenv import load_dotenv
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from supee import get_string_after_div
@@ -13,6 +7,7 @@ import time
 import os
 
 # Function to find elements, handle stale exception, and retry
+# Set up Chrome options
 
 
 def find_link_elements(driver):
@@ -50,11 +45,7 @@ def filter_html_elements(elements):
     return filtered_elements
 
 
-def scrape_fb(name):
-
-    # Load the .env file
-    load_dotenv()
-
+def login(driver, should_not_login):
     # Access the variables
     email = os.getenv('FB_EMAIL')
     password = os.getenv('FB_PASSWORD')
@@ -62,25 +53,9 @@ def scrape_fb(name):
     # Facebook login page URL
     login_url = "https://www.facebook.com"
 
-    # Replace spaces with %20 for URL encoding
-    dynamic_query_encoded = name.replace(' ', '%20')
-    print(f"Encoded query: {dynamic_query_encoded}")
-
-    # Facebook search page URL
-    search_url = f"https://www.facebook.com/search/top/?q={dynamic_query_encoded}"
-
-    # Set up Chrome options
-    options = Options()
-    options.add_argument("--disable-notifications")
-
-    # Use the appropriate WebDriver executable path
-    webdriver_service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=webdriver_service, options=options)
-
-    # Create a directory for the screenshots
-    os.makedirs('screenshots', exist_ok=True)
-
-    try:
+    if should_not_login:
+        driver.get("login_url")
+    else:
         # Navigate to the Facebook login page
         driver.get(login_url)
 
@@ -93,6 +68,21 @@ def scrape_fb(name):
         email_field.send_keys(email)
         password_field.send_keys(password)
         login_button.click()
+
+
+def scrape_fb(driver, name):
+
+    # Replace spaces with %20 for URL encoding
+    dynamic_query_encoded = name.replace(' ', '%20')
+    print(f"Encoded query: {dynamic_query_encoded}")
+
+    # Facebook search page URL
+    search_url = f"https://www.facebook.com/search/top/?q={dynamic_query_encoded}"
+
+    # Create a directory for the screenshots
+    os.makedirs('screenshots', exist_ok=True)
+
+    try:
 
         # Navigate to the Facebook search page
         wait_page_load(driver)
@@ -107,10 +97,11 @@ def scrape_fb(name):
 
         # elements checkpoint
         filtered_elements = filter_html_elements(elements)
-        
+
         # Open each profile and take a screenshot
         for i in range(len(filtered_elements)):
-            if i == 5:
+            # limit of the number of elements to be processed
+            if i == 3:
                 break
 
             print(f"Processing profile {i}...")  # Debug log
@@ -149,4 +140,4 @@ def scrape_fb(name):
 
     finally:
         # Close the browser window
-        driver.quit()
+        print("Done...")

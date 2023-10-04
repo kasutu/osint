@@ -1,7 +1,14 @@
 import os
 import webbrowser
 import sys
-from scrape_fb import scrape_fb
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from dotenv import load_dotenv
+
+from scrape_fb import scrape_fb, login
 
 names_file = "names.txt"
 progress_file = "progress.txt"
@@ -15,6 +22,23 @@ else:
 with open(names_file, 'r') as f:
     names = f.readlines()
 
+options = Options()
+options.add_argument("--disable-notifications")
+
+# Use the appropriate WebDriver executable path
+webdriver_service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=webdriver_service, options=options)
+
+should_not_login = False
+
+# Load the .env file
+load_dotenv()
+
+if "--bypass-login" in sys.argv:
+    should_not_login = True
+
+login(driver, should_not_login)
+
 for i in range(progress, len(names)):
     name = names[i].strip()
     last_name, first_name = name.split(',')
@@ -23,7 +47,7 @@ for i in range(progress, len(names)):
     print(f"Searching for: {scrapable_name}")
 
     if "--scrape" in sys.argv:
-        scrape_fb(scrapable_name)
+        scrape_fb(driver, scrapable_name)
         continue
 
     if "--scrape" not in sys.argv:
@@ -37,6 +61,5 @@ for i in range(progress, len(names)):
     if "--bypass-pause" not in sys.argv:
         input("Press Enter to continue to the next target...")
 
-
-if os.path.exists(progress_file):
-    os.remove(progress_file)
+# Close the browser window
+driver.quit()
